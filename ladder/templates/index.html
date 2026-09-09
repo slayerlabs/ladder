@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tiny LLM Ladder · GPU scorer</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --panel:#121a2d; --line:#273554; --text:#e8edf7; --muted:#9aa8c2; --accent:#78a9ff; --good:#73dfb2; }
+    * { box-sizing:border-box } body { margin:0; font:15px/1.5 ui-sans-serif,system-ui,-apple-system,sans-serif; color:var(--text); background:radial-gradient(circle at 75% -10%,#1b3562 0,transparent 38%),var(--bg) }
+    main { max-width:1050px; margin:auto; padding:56px 24px 72px }
+    nav { display:flex; justify-content:space-between; color:var(--muted); font-size:13px; letter-spacing:.08em; text-transform:uppercase }
+    .mark { color:var(--accent); font-weight:700 } .hero { padding:74px 0 48px; max-width:780px }
+    h1 { margin:0 0 20px; font-size:clamp(38px,7vw,72px); line-height:1.02; letter-spacing:-.05em }
+    h1 span { color:var(--accent) } .lede { color:var(--muted); font-size:20px; max-width:660px }
+    .actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:30px } a.button { border:1px solid var(--line); border-radius:7px; padding:10px 15px; color:var(--text); text-decoration:none; background:var(--panel) } a.primary { color:#06101f; background:var(--accent); border-color:var(--accent); font-weight:700 }
+    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:14px 0 44px } .card,.panel { border:1px solid var(--line); border-radius:10px; background:color-mix(in srgb,var(--panel) 92%,transparent); padding:18px }
+    .kicker { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em } .value { display:block; margin-top:6px; font-size:23px; font-weight:700 }
+    section { margin-top:38px } h2 { font-size:25px; letter-spacing:-.025em; margin:0 0 14px } p { color:var(--muted) }
+    table { width:100%; border-collapse:collapse; margin-top:12px } th,td { text-align:left; padding:12px 10px; border-bottom:1px solid var(--line) } th { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.06em } td.num { font-variant-numeric:tabular-nums } .good { color:var(--good) }
+    code { color:#c5d7ff; background:#0a1224; padding:2px 5px; border-radius:4px } pre { overflow:auto; padding:16px; border:1px solid var(--line); border-radius:8px; background:#080e1b; color:#c5d7ff }
+    footer { margin-top:55px; color:var(--muted); font-size:13px } .status { display:inline-flex; align-items:center; gap:7px } .dot { width:8px;height:8px;border-radius:50%;background:var(--good);display:inline-block }
+    @media(max-width:720px) { main { padding:30px 16px 50px } .hero { padding-top:54px } .grid { grid-template-columns:repeat(2,1fr) } th,td { padding:9px 5px; font-size:13px } }
+  </style>
+</head>
+<body>
+<main>
+  <nav><span class="mark">TINY LLM LADDER</span><span class="status"><i class="dot"></i><span id="state">service online</span></span></nav>
+  <div class="hero">
+    <h1>Measure the rung.<br><span>Keep the evidence.</span></h1>
+    <p class="lede">A private GPU scorer for deterministic language-model benchmarks. Same pair IDs, same tokenizer boundaries, same fp32 protocol—ready for controlled small-model comparisons.</p>
+    <div class="actions"><a class="button primary" href="#comparison">View measured comparison</a><a class="button" href="#api">Use the API</a></div>
+  </div>
+  <div class="grid"><div class="card"><span class="kicker">Loaded model</span><span class="value" id="model">Koliber v1.1</span></div><div class="card"><span class="kicker">Parameters</span><span class="value" id="params">126.0M</span></div><div class="card"><span class="kicker">Hardware</span><span class="value">RTX 3090</span></div><div class="card"><span class="kicker">Protocol</span><span class="value">fp32 · MPS/CUDA</span></div></div>
+  <section id="comparison"><h2>Measured Polish micro</h2><p>2,000 identical provisional agreement pairs. Pair probability is continuous; accuracy is shown only as a diagnostic. BPB is not included because the frozen validation corpus is not yet available.</p>
+    <div class="panel"><table><thead><tr><th>Model</th><th>Sentence pair probability</th><th>Critical-region probability</th><th>Time</th></tr></thead><tbody><tr><td>Koliber v1.1</td><td class="num good">0.9083</td><td class="num">0.8913</td><td class="num">111.3 s</td></tr><tr><td>Pollock 1.4</td><td class="num">0.5914</td><td class="num">0.5718</td><td class="num">100.4 s</td></tr></tbody></table></div>
+  </section>
+  <section><h2>What this service measures</h2><div class="grid"><div class="card"><span class="kicker">Continuous</span><p>Sentence and critical-region pair probabilities, with raw log margins retained.</p></div><div class="card"><span class="kicker">Deterministic</span><p>One worker, serialized requests, fixed protocol and no generation sampling.</p></div><div class="card"><span class="kicker">Auditable</span><p>Revision, parameter count, tokenizer hash, device and runtime are returned.</p></div><div class="card"><span class="kicker">Private</span><p>Loopback-only by default. Reach it through SSH forwarding or a private authenticated proxy.</p></div></div></section>
+  <section id="api"><h2>API</h2><p>Send a JSON object with one to 2,000 pair records. The service keeps the loaded model resident on GPU 0.</p><pre>curl -X POST http://127.0.0.1:18150/v1/score/pairs \
+  -H 'content-type: application/json' \
+  --data-binary @pairs-request.json</pre></section>
+  <footer>Provisional result · native review pending · no decision eligibility · <a href="/docs" style="color:var(--accent)">OpenAPI docs</a> · <a href="/health" style="color:var(--accent)">health</a></footer>
+</main>
+<script>
+fetch('/health').then(r=>r.json()).then(x=>{document.querySelector('#state').textContent='service online · '+x.model.device;document.querySelector('#model').textContent=x.model.model.split('/').pop();document.querySelector('#params').textContent=(x.model.parameters/1e6).toFixed(1)+'M'}).catch(()=>{document.querySelector('.dot').style.background='#ff8d8d';document.querySelector('#state').textContent='health check failed'});
+</script>
+</body>
+</html>

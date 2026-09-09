@@ -10,6 +10,7 @@ import time
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from .scoring import Scorer, score_pairs
@@ -24,6 +25,11 @@ def create_app(model: str, revision: str | None, adapter: str | None,
     scorer = Scorer(model, revision, device, batch_size, context, adapter, "sdpa_math" if adapter == "koliber" else "eager")
     lock = threading.Lock()
     app = FastAPI(title="tiny-LLM benchmark scorer", version="0.2.0")
+
+    @app.get("/", include_in_schema=False)
+    def landing_page():
+        page = os.path.join(os.path.dirname(__file__), "templates", "index.html")
+        return FileResponse(page, media_type="text/html")
 
     @app.get("/health")
     def health():
