@@ -49,6 +49,7 @@ def create_app(model: str, revision: str | None, adapter: str | None,
     scorer = Scorer(model, revision, device, batch_size, context, adapter, "sdpa_math" if adapter == "koliber" else "eager")
     lock = threading.Lock()
     pairs_path = Path(os.environ.get("LADDER_PAIRS", "data/multiblimp-pl-v0/candidates.jsonl"))
+    allow_external_models = os.environ.get("LADDER_ALLOW_EXTERNAL_MODELS", "false").lower() == "true"
     app = FastAPI(title="tiny-LLM benchmark scorer", version="0.2.0")
 
     @app.get("/", include_in_schema=False)
@@ -75,6 +76,8 @@ def create_app(model: str, revision: str | None, adapter: str | None,
     @app.post("/v1/benchmark/micro")
     def micro(request: MicroRequest):
         """Run the provisional Polish agreement micro battery on an HF model."""
+        if not allow_external_models:
+            raise HTTPException(status_code=403, detail="External model evaluation is temporarily disabled")
         try:
             requested_model = normalize_hf_model(request.model)
         except ValueError as exc:
