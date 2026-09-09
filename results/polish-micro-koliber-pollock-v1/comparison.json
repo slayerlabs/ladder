@@ -1,0 +1,100 @@
+{
+  "status": "provisional, unreviewed Polish agreement only; no BPB",
+  "suite_sha256": "5a8930dfbe2755556830f0b6dbc7df1ee9446130a8541296675ff05788b15643",
+  "protocol_sha256": "b074247aa0d67194a7fddad809dfaf5a96be0358ad8f528f6ea297a2f1d2f5fb",
+  "coverage": {
+    "pairs": 2000,
+    "pairs_with_region": 1171,
+    "validation_documents": 0,
+    "validation_reference_tokens": 0
+  },
+  "models": {
+    "koliber": {
+      "model": "OrisTeam/Koliber-v1.1-Base-Preview",
+      "revision": "10bfff5fec23a43cd798b80645f95673a234f39a",
+      "parameters": 126044928,
+      "pairs": 2000,
+      "region_pairs": 1171,
+      "sentence_prob": 0.9083057306445699,
+      "region_prob": 0.8913020269218757,
+      "sentence_accuracy": 0.9365,
+      "evaluation_seconds": 111.34845299995504,
+      "total_seconds": 112.98802320903633,
+      "paradigms": {
+        "pl/SV-#": {
+          "n": 667,
+          "region_n": 359,
+          "sentence_prob": 0.8948490918603055,
+          "sentence_accuracy": 0.9265367316341829,
+          "sentence_log_margin": 4.785310996117374,
+          "region_prob": 0.8838431871390949
+        },
+        "pl/SV-G": {
+          "n": 667,
+          "region_n": 347,
+          "sentence_prob": 0.8827931455222003,
+          "sentence_accuracy": 0.9190404797601199,
+          "sentence_log_margin": 3.8767461923602804,
+          "region_prob": 0.8663072368649865
+        },
+        "pl/SV-P": {
+          "n": 666,
+          "region_n": 465,
+          "sentence_prob": 0.947333466899412,
+          "sentence_accuracy": 0.963963963963964,
+          "sentence_log_margin": 6.894484280784091,
+          "region_prob": 0.91571259817297
+        }
+      }
+    },
+    "pollock": {
+      "model": "SlayerLab/pollock-mini-lm-125m",
+      "revision": "0d22afece64fc5a28f1a32e3eac7a14bc563e089",
+      "parameters": 127674624,
+      "pairs": 2000,
+      "region_pairs": 1171,
+      "sentence_prob": 0.5914072010741339,
+      "region_prob": 0.5717895779533969,
+      "sentence_accuracy": 0.597,
+      "evaluation_seconds": 100.40165250003338,
+      "total_seconds": 103.43767591600772,
+      "paradigms": {
+        "pl/SV-#": {
+          "n": 667,
+          "region_n": 359,
+          "sentence_prob": 0.5234667358884051,
+          "sentence_accuracy": 0.52023988005997,
+          "sentence_log_margin": 0.5631859824726893,
+          "region_prob": 0.5197224641580567
+        },
+        "pl/SV-G": {
+          "n": 667,
+          "region_n": 347,
+          "sentence_prob": 0.5074212244595959,
+          "sentence_accuracy": 0.5157421289355323,
+          "sentence_log_margin": 0.0010449886815030336,
+          "region_prob": 0.48080072934661827
+        },
+        "pl/SV-P": {
+          "n": 666,
+          "region_n": 465,
+          "sentence_prob": 0.7435617606548816,
+          "sentence_accuracy": 0.7552552552552553,
+          "sentence_log_margin": 3.479151509066902,
+          "region_prob": 0.6798868345535674
+        }
+      }
+    }
+  },
+  "pollock_minus_koliber": {
+    "sentence_prob": -0.31689852957043596,
+    "region_prob": -0.31951244896847875,
+    "sentence_accuracy": -0.3395
+  },
+  "decision_eligible": false,
+  "notes": [
+    "No seed variance, significance, or general model superiority is inferred.",
+    "Pollock is English-trained according to its model card; this dataset is Polish.",
+    "Native review and training-overlap audit are pending."
+  ]
+}

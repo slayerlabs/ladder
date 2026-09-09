@@ -122,6 +122,33 @@ class ContinuousTests(unittest.TestCase):
         text = ' '.join(str(i) for i in range(40))
         self.assertEqual(jaccard(shingles(text), shingles(text.upper())), 1)
 
+    def test_explicit_unreviewed_micro_stays_incomplete(self):
+        from ladder.benchmark import evaluate_benchmark
+        class FakeScorer:
+            metadata = {'dtype': 'float32', 'attention': 'fixture', 'deterministic_algorithms': True,
+                        'batch_shape': [8, 512], 'stride': 256}
+            def score(self, requests):
+                return [{'nll_nats': 1., 'bytes': len(r.text.encode()), 'tokens': 2} for r in requests]
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'pairs.jsonl'
+            path.write_text(json.dumps({'id': 'one', 'paradigm': 'agreement', 'language': 'pl',
+                'axis': 'agreement_pairs', 'good': 'Oni piszą.', 'bad': 'Oni pisze.', 'region': None}) + '\n')
+            with self.assertRaisesRegex(ValueError, 'allow-incomplete'):
+                evaluate_benchmark(FakeScorer(), None, pl_path=path, allow_unreviewed=True)
+            report = evaluate_benchmark(FakeScorer(), None, pl_path=path,
+                                       allow_incomplete=True, allow_unreviewed=True)
+            self.assertFalse(report['decision_eligible'])
+            self.assertFalse(report['complete'])
+            self.assertEqual(report['coverage']['validation_reference_tokens'], 0)
+            self.assertEqual(report['coverage']['pairs'], 1)
+            self.assertEqual(report['corpus'], {})
+            self.assertEqual(report['pair_items'][0]['sentence_prob'], .5)
+
+    def test_koliber_adapter_rejects_unreviewed_revision(self):
+        from ladder.adapters import koliber_snapshot, KOLIBER_REPO
+        with self.assertRaisesRegex(ValueError, 'exact pinned revision'):
+            koliber_snapshot(KOLIBER_REPO, 'main')
+
     def test_review_pending_is_not_admitted(self):
         from ladder.corpus import sha_file
         with tempfile.TemporaryDirectory() as temp:

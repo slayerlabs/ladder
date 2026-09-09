@@ -29,14 +29,32 @@ def stable_take(items, count):
 
 
 def evaluate_benchmark(scorer, corpus_path, pl_path=None, review_path=None, en_path=None,
-                       tier='micro', rung=8, mc_path=None, allow_incomplete=False):
+                       tier='micro', rung=8, mc_path=None, allow_incomplete=False, allow_unreviewed=False):
     if tier not in ('micro', 'fast', 'full'):
         raise ValueError('Unknown tier')
     policy = scale_policy(rung)
-    manifest, documents = load_frozen(corpus_path)
-    pl = reviewed_pairs(pl_path, review_path) if pl_path and review_path else []
-    en = list(jsonl(en_path)) if en_path else []
     missing = []
+    if allow_unreviewed and not allow_incomplete:
+        raise ValueError('Unreviewed pairs require --allow-incomplete; never decision eligible')
+    if corpus_path:
+        manifest, documents = load_frozen(corpus_path)
+    elif allow_incomplete:
+        manifest, documents = {'documents_sha256': None}, []
+        missing.append('Frozen validation corpus unavailable; BPB not measured')
+    else:
+        raise ValueError('Frozen corpus required unless --allow-incomplete is explicit')
+    if allow_unreviewed and pl_path:
+        pl = list(jsonl(pl_path))
+        missing.append('Native Polish review pending; unreviewed candidates used')
+        if review_path:
+            review = json.loads(Path(review_path).read_text())
+            if review['candidate_sha256'] != sha_file(pl_path):
+                raise ValueError('Review does not match candidate file')
+            rejected = {i for p in review['paradigms'].values() for i in p.get('rejected_ids', [])}
+            pl = [p for p in pl if p['id'] not in rejected]
+    else:
+        pl = reviewed_pairs(pl_path, review_path) if pl_path and review_path else []
+    en = list(jsonl(en_path)) if en_path else []
     if tier == 'micro':
         documents = [{**d, 'text': d['micro_text'], 'reference_tokens': d['micro_reference_tokens']}
                      for d in documents if d['micro_text']]
@@ -73,10 +91,10 @@ def evaluate_benchmark(scorer, corpus_path, pl_path=None, review_path=None, en_p
     if len({p['id'] for p in selected_pairs}) != len(selected_pairs):
         raise ValueError('Duplicate pair IDs across selected languages')
     suite = {'corpus': manifest['documents_sha256'],
-             'corpus_manifest': sha_file(Path(corpus_path) / 'manifest.json'),
+             'corpus_manifest': sha_file(Path(corpus_path) / 'manifest.json') if corpus_path else None,
              'pl': sha_file(pl_path) if pl_path else None, 'review': sha_file(review_path) if review_path else None,
              'en': sha_file(en_path) if en_path else None, 'mc': sha_file(mc_path) if mc_path else None,
-             'selection_version': 1}
+             'selection_version': 1, 'allow_unreviewed': allow_unreviewed}
     suite_hash = hashlib.sha256(json.dumps(suite, sort_keys=True).encode()).hexdigest()
     protocol = {k: scorer.metadata[k] for k in ('dtype', 'attention', 'deterministic_algorithms', 'batch_shape', 'stride')}
     protocol.update(version=2, scoring='sum-target-logprob; exact original UTF8 bytes; BOS reset per document',
@@ -127,9 +145,11 @@ def evaluate_benchmark(scorer, corpus_path, pl_path=None, review_path=None, en_p
     return {'schema_version': 2, 'suite_sha256': suite_hash, 'suite_inputs': suite,
             'protocol_sha256': hashlib.sha256(json.dumps(protocol, sort_keys=True).encode()).hexdigest(),
             'protocol': protocol, 'model': scorer.metadata, 'tier': tier, 'rung': rung,
-            'decision_eligible': tier == 'fast' and not missing, 'missing': missing,
+            'decision_eligible': tier == 'fast' and not missing, 'complete': not missing, 'missing': missing,
+            'coverage': {'pairs': len(selected_pairs), 'pairs_with_region': sum(p.get('region') is not None for p in selected_pairs),
+                         'validation_documents': len(documents), 'validation_reference_tokens': sum(d['reference_tokens'] for d in documents)},
             'scale_policy': policy, 'metrics': metrics, 'corpus': corpus_results,
             'pairs': pair_results, 'pair_items': pair_rows, 'mc_items': mc_rows,
             'notes': ['Scale statuses are priors until seed separation is measured.',
                       'Micro never settles decisions; partial tiers are never decision eligible.',
-                      'Runtime targets have not been measured on trained checkpoints.']}
+                      'Any reported timing applies only to the measured coverage and recorded hardware.']}

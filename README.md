@@ -1,19 +1,36 @@
 # Tiny LLM benchmark ladder
 
-A continuous evaluation pipeline for **8M → 25M → 50M → 120M**, with three separate axes: **metrics**, **evaluation cadence**, and **empirical scale admission**. The ladder is validated by cross-rung agreement on data-mix rankings.
+A continuous evaluation pipeline for **8M → 25M → 50M → 120M**, with three separate axes: **metrics**, **evaluation cadence**, and **empirical scale admission**. Ladder validity is tested through cross-rung agreement on data-mix rankings.
 
 The default CLI now runs standalone Transformers/PyTorch scorers; **no `lm-eval-harness` dependency** is needed. The original synthetic suite remains available as `ladder-synthetic`, documented in [the legacy notes](docs/legacy-synthetic.md). Its accuracy tiers are not training-decision criteria.
+
+<!-- micro-results:start -->
+## Measured Polish micro — provisional
+
+Measured on an Apple M4 Max (40-core GPU, 64 GB), using MPS, fp32, math SDPA, fixed batch 8 × 512, and no sampling.
+
+| Model | Parameters | Sentence pair probability ↑ | Critical-region probability ↑ | Sentence accuracy (diagnostic) | Evaluation time |
+|---|---:|---:|---:|---:|---:|
+| [Koliber v1.1 Base Preview](https://huggingface.co/OrisTeam/Koliber-v1.1-Base-Preview/tree/10bfff5fec23a43cd798b80645f95673a234f39a) | 126,044,928 | 0.9083 | 0.8913 | 93.65% | 111.3 s |
+| [Pollock 1.4](https://huggingface.co/SlayerLab/pollock-mini-lm-125m/tree/0d22afece64fc5a28f1a32e3eac7a14bc563e089) | 127,674,624 | 0.5914 | 0.5718 | 59.70% | 100.4 s |
+
+Both models scored the **same 2,000 pair IDs**; critical-region results cover the same **1,171 pairs**. Probabilities are averaged over items, not inferred from accuracy. Runtime excludes model loading and output serialization.
+
+**Scope:** provisional Polish subject–verb agreement candidates from MultiBLiMP. Native review and training-overlap checks are pending. The frozen 200k-token validation corpus is unavailable, so **BPB was not measured** and this is not a complete micro tier. Pollock’s model card lists English training, while Koliber is primarily Polish; this is not a matched-language or overall-capability ranking. No seed-calibrated adoption claim is made.
+
+[Comparison and reproduction details](results/polish-micro-koliber-pollock-v1/README.md) · [Machine-readable comparison](results/polish-micro-koliber-pollock-v1/comparison.json) · [Koliber item scores](results/polish-micro-koliber-pollock-v1/koliber.json) · [Pollock item scores](results/polish-micro-koliber-pollock-v1/pollock.json)
+<!-- micro-results:end -->
 
 ## Current implementation
 
 - Frozen validation documents: reference-token budgets, exact byte preservation, source allowlists, two out-of-mix slices, document-ID exclusion, 13-word-gram MinHash screening against the supplied full training pool, and exact Jaccard verification at 0.8 for retrieved matches.
-- Deterministic fp32 scoring with eager attention, fixed padded batch shapes, document resets, and bounded sliding context. No decoding or sampling during development evaluation.
+- Deterministic fp32 scoring with eager or forced math-SDPA attention, fixed padded batch shapes, document resets, and bounded sliding context. No decoding or sampling during development evaluation.
 - Corpus BPB, full-sentence pair probability, critical-region pair probability, and correct-choice MC BPB. Pair accuracy and log margin are diagnostics only.
 - Micro/fast/full coverage checks. Incomplete tiers are explicitly marked and cannot settle decisions.
 - Last-three-checkpoint averaging; seed SD, SNR and empirical admission; the out-of-mix BPB/no-pair-regression decision rule.
 - Spearman rank agreement between 8M/25M and 120M, with exact permutation p-values for the same 4–6 candidate mixes.
 
-**Not yet measured:** real corpus scores, seed noise, rung admission, runtimes, or rank agreement. The full training pool, held-out sources, and trained checkpoints have not been supplied. PL paradigms beyond agreement, the EN dataset, natural MC datasets, and release-only adapters are not built yet.
+**Not yet measured:** real corpus scores, seed noise, rung admission, complete-tier runtimes, or rank agreement. Provisional pair-only results and runtimes are reported above. The full training pool, held-out sources, and multi-seed training checkpoints have not been supplied. PL paradigms beyond agreement, the EN dataset, natural MC datasets, and release-only adapters are not built yet.
 
 ## Install and verify
 
@@ -67,7 +84,7 @@ The data directory is ignored by Git. Recreate the pool from a local TSV with:
   --output data/multiblimp-pl-v0-new
 ```
 
-A native reviewer records their identity, `native_polish: true`, all reviewed sample IDs, rejected IDs, and a paradigm-level `status: approved` after reviewing and accepting the pool. The candidate hash binds review to the data. Rejected pairs are excluded. The scorer refuses unapproved paradigms. Approval of a sample is not a guarantee that every unreviewed pair is clean.
+A native reviewer records their identity, `native_polish: true`, all reviewed sample IDs, rejected IDs, and a paradigm-level `status: approved` after reviewing and accepting the pool. The candidate hash binds review to the data. Rejected pairs are excluded. Normal evaluation refuses unapproved paradigms. An explicitly provisional run may use `--allow-incomplete --allow-unreviewed`; this never admits the data and cannot become decision eligible. Approval of a sample is not a guarantee that every unreviewed pair is clean.
 
 Critical regions include preceding whitespace and every subword of the changed whitespace-delimited word. Imported regions are omitted when the controller occurs after the agreement target, since prefix-only scoring then lacks the relevant evidence. Sentence probability is still available. Region boundaries and attached punctuation are part of native review; token-boundary crossings fail explicitly.
 
@@ -112,3 +129,20 @@ All analysis uses each seed's mean over its last three distinct checkpoint steps
 Rank agreement requires the same 4–6 mixes at 8M, 25M, and 120M. Publish per-metric ρ even when it is zero, negative, or undefined because of ties. Four to six mixes provide limited statistical resolution; there is no automatic “high enough” cutoff.
 
 See [the protocol](docs/protocol.md) for the metric, cadence and scale-gating tables, and [configs/ladder.json](configs/ladder.json) for the machine-readable specification.
+
+## Koliber provisional micro
+
+The `koliber` adapter supports `OrisTeam/Koliber-v1.1-Base-Preview` at reviewed revision `10bfff5fec23a43cd798b80645f95673a234f39a` only. It validates the custom source/config hashes and forces math SDPA in fp32. Score accumulation transfers to CPU before float64 conversion, supporting MPS. This adapter has a different recorded attention backend from the default eager scorer; analysis rejects mixed protocols.
+
+To run the pair component while the corpus and native review remain unavailable:
+
+```sh
+.venv/bin/ladder eval --model OrisTeam/Koliber-v1.1-Base-Preview \
+  --revision 10bfff5fec23a43cd798b80645f95673a234f39a --adapter koliber \
+  --pl-pairs data/multiblimp-pl-v0/candidates.jsonl \
+  --review data/multiblimp-pl-v0/review.json \
+  --tier micro --rung 120 --device mps --batch-size 8 --context 512 \
+  --allow-incomplete --allow-unreviewed --output runs/koliber-micro-provisional.json
+```
+
+This measures 2,000 deterministic, stratified agreement pairs. It does **not** measure the missing 200k-token BPB component or establish reviewed benchmark capability. Reports retain missing coverage, actual parameter count (126,044,928), wall time, and `decision_eligible: false`. `--rung 120` selects the nearest intended reporting rung explicitly; it does not change the recorded model size.

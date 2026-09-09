@@ -3,6 +3,7 @@ import hashlib
 import math
 import os
 from dataclasses import dataclass
+from contextlib import nullcontext
 
 
 @dataclass
@@ -23,7 +24,7 @@ def bpb(total_nll_nats, total_bytes):
 
 
 class Scorer:
-    def __init__(self, model_path, revision=None, device="cpu", batch_size=8, context=512):
+    def __init__(self, model_path, revision=None, device="cpu", batch_size=8, context=512, adapter=None, attention=None):
         os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -34,9 +35,22 @@ class Scorer:
         torch.backends.cudnn.allow_tf32 = False
         torch.backends.cudnn.benchmark = False
         self.torch = torch
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path, revision=revision, use_fast=True, trust_remote_code=False)
-        self.model = AutoModelForCausalLM.from_pretrained(model_path, revision=revision, dtype=torch.float32,
-                                                         attn_implementation="eager", trust_remote_code=False).to(device).eval()
+        if adapter not in (None, 'koliber'):
+            raise ValueError('Unknown model adapter')
+        self.adapter = adapter
+        self.attention = attention or ('sdpa_math' if adapter == 'koliber' else 'eager')
+        if self.attention not in ('eager', 'sdpa_math') or (adapter == 'koliber' and self.attention != 'sdpa_math'):
+            raise ValueError('Use eager or sdpa_math attention; Koliber requires sdpa_math')
+        if adapter == 'koliber':
+            from .adapters import koliber_snapshot
+            snapshot = koliber_snapshot(model_path, revision)
+            self.tokenizer = AutoTokenizer.from_pretrained(snapshot, use_fast=True, trust_remote_code=False)
+            self.model = AutoModelForCausalLM.from_pretrained(snapshot, dtype=torch.float32,
+                                                             trust_remote_code=True).to(device).eval()
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(model_path, revision=revision, use_fast=True, trust_remote_code=False)
+            self.model = AutoModelForCausalLM.from_pretrained(model_path, revision=revision, dtype=torch.float32,
+                                                             attn_implementation="sdpa" if self.attention == "sdpa_math" else "eager", trust_remote_code=False).to(device).eval()
         limit = getattr(self.model.config, "max_position_embeddings", None)
         if limit is not None and context > limit:
             raise ValueError(f"Context {context} exceeds model limit {limit}")
@@ -49,7 +63,7 @@ class Scorer:
         self.metadata = {"model": model_path, "requested_revision": revision,
                          "resolved_revision": getattr(self.model.config, "_commit_hash", None),
                          "parameters": sum(p.numel() for p in self.model.parameters()),
-                         "dtype": "float32", "attention": "eager", "deterministic_algorithms": True,
+                         "adapter": adapter, "dtype": "float32", "attention": self.attention, "deterministic_algorithms": True,
                          "batch_shape": [batch_size, context], "stride": context // 2,
                          "document_start_token": self.bos, "device": device,
                          "tokenizer_sha256": hashlib.sha256(self.tokenizer.backend_tokenizer.to_str().encode()).hexdigest()}
@@ -80,11 +94,13 @@ class Scorer:
                 selected[row, :n] = t.tensor(choose, device=self.device)
             # Dummy rows have valid attention; no targets are selected.
             masks[len(jobs):, 0] = 1
-            with t.inference_mode():
+            from torch.nn.attention import sdpa_kernel, SDPBackend
+            attention_context = sdpa_kernel(SDPBackend.MATH) if self.attention == 'sdpa_math' else nullcontext()
+            with t.inference_mode(), attention_context:
                 logits = self.model(input_ids=inputs, attention_mask=masks, use_cache=False).logits.float()
                 losses = t.nn.functional.cross_entropy(logits.transpose(1, 2), labels, reduction="none")
                 for row, (index, _, _, _) in enumerate(jobs):
-                    values = losses[row][selected[row]].double().cpu().tolist()
+                    values = losses[row][selected[row]].cpu().double().tolist()
                     outputs[index]["parts"].extend(values)
             jobs.clear()
         for index, request in enumerate(requests):

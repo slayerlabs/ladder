@@ -1,6 +1,7 @@
 """Continuous benchmark CLI. Legacy synthetic CLI remains under ladder-synthetic."""
 import argparse
 import json
+import time
 from pathlib import Path
 from .corpus import freeze
 from .analysis import calibrate, rank_agreement, decision
@@ -32,7 +33,9 @@ def main():
     f = sub.add_parser('eval')
     f.add_argument('--model', required=True)
     f.add_argument('--revision')
-    f.add_argument('--corpus', required=True)
+    f.add_argument('--corpus')
+    f.add_argument('--adapter', choices=['koliber'])
+    f.add_argument('--attention', choices=['eager', 'sdpa_math'])
     f.add_argument('--pl-pairs')
     f.add_argument('--review')
     f.add_argument('--en-pairs')
@@ -43,6 +46,7 @@ def main():
     f.add_argument('--batch-size', type=int, default=8)
     f.add_argument('--context', type=int, default=512)
     f.add_argument('--allow-incomplete', action='store_true')
+    f.add_argument('--allow-unreviewed', action='store_true', help='Provisional diagnostics only; requires --allow-incomplete')
     f.add_argument('--output', required=True)
     f = sub.add_parser('collect')
     f.add_argument('--manifest', required=True)
@@ -81,9 +85,13 @@ def main():
         if args.command == 'eval':
             from .scoring import Scorer
             from .benchmark import evaluate_benchmark
-            scorer = Scorer(args.model, args.revision, args.device, args.batch_size, args.context)
+            started = time.perf_counter()
+            scorer = Scorer(args.model, args.revision, args.device, args.batch_size, args.context, args.adapter, args.attention)
+            loaded = time.perf_counter()
             result = evaluate_benchmark(scorer, args.corpus, args.pl_pairs, args.review, args.en_pairs,
-                                        args.tier, args.rung, args.mc, args.allow_incomplete)
+                                        args.tier, args.rung, args.mc, args.allow_incomplete, args.allow_unreviewed)
+            result['timing_seconds'] = {'load': loaded - started, 'evaluation': time.perf_counter() - loaded,
+                                        'total': time.perf_counter() - started}
         elif args.command == 'collect':
             from .collection import collect
             result = collect(args.manifest)

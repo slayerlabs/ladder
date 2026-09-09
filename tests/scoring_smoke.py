@@ -26,6 +26,11 @@ def main():
         request = Request('Żółć i źdźbło.')
         first, second = scorer.score([request]), scorer.score([request])
         assert first == second, 'Repeated evaluations must match exactly'
+        math_scorer = Scorer(temp, batch_size=4, context=64, attention='sdpa_math')
+        math_result = math_scorer.score([request])
+        assert math_scorer.metadata['attention'] == 'sdpa_math'
+        assert abs(math_result[0]['nll_nats'] - first[0]['nll_nats']) < 1e-4
+        del math_scorer
         assert first[0]['bytes'] == len(request.text.encode())
         ids = [tokenizer.bos_token_id] + tokenizer.encode(request.text, add_special_tokens=False)
         with torch.inference_mode():
