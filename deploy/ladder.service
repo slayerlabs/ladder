@@ -13,7 +13,7 @@ Environment=LADDER_ADAPTER=koliber
 Environment=LADDER_DEVICE=cuda:0
 Environment=LADDER_BATCH_SIZE=8
 Environment=LADDER_CONTEXT=512
-Environment=LADDER_HOST=127.0.0.1
+Environment=LADDER_HOST=100.70.120.9
 Environment=LADDER_PORT=18150
 ExecStart=/usr/bin/python3 -m ladder.service
 Restart=on-failure
