@@ -29,6 +29,10 @@
     main { max-width:1440px; padding:0 56px 70px; }
     nav { height:64px; margin:0 -56px; padding:0 56px; border-bottom:1px solid var(--rule); color:var(--ink); background:rgba(252,250,246,.97); }
     .mark { color:var(--ink); font:500 24px/1 'EB Garamond',Georgia,serif; letter-spacing:0; }
+    nav .mark { text-decoration:none; white-space:nowrap; }
+    .nav-links { display:flex; gap:24px; margin-left:42px; }
+    .nav-links a { color:var(--ink-2); font:500 11px 'JetBrains Mono',monospace; text-decoration:none; }
+    .nav-links a:hover { color:var(--sota); }
     nav > span:last-child { color:var(--mute); font:10px 'JetBrains Mono',monospace; letter-spacing:.06em; }
     .hero { max-width:780px; padding:86px 0 62px; }
     h1,h2 { font-family:'EB Garamond',Georgia,serif; font-weight:500; }
@@ -83,12 +87,12 @@
     pre { background:var(--dark); color:var(--paper); border:0; }
     footer { border-top:1px solid var(--rule); }
     input { font-family:Inter,Arial,sans-serif; }
-    @media(max-width:720px) { main { padding:0 20px 50px } nav { margin:0 -20px; padding:0 20px; } .hero { padding-top:62px; } .section-title,.evidence-callout { grid-template-columns:1fr; gap:20px; } .evidence-section { padding-top:55px; } }
+    @media(max-width:720px) { main { padding:0 20px 50px } nav { margin:0 -20px; padding:0 20px; } .nav-links { display:none; } .hero { padding-top:62px; } .section-title,.evidence-callout { grid-template-columns:1fr; gap:20px; } .evidence-section { padding-top:55px; } }
   </style>
 </head>
 <body>
 <main>
-  <nav><span class="mark">TINY LLM LADDER</span><span class="status"><i class="dot"></i><span id="state">service online</span></span></nav>
+  <nav><a class="mark" href="https://fabryka.ai">Fabryka<span style="color:var(--sota)">.</span></a><span class="nav-links"><a href="https://fabryka.ai">Fabryka AI</a><a href="https://codesota.com">CodeSOTA</a><a href="https://eval.fabryka.ai">Evaluator</a></span><span class="status"><i class="dot"></i><span id="state">service online</span></span></nav>
   <div class="hero">
     <h1>Measure the rung.<br><span>Keep the evidence.</span></h1>
     <p class="lede">A private GPU scorer for deterministic language-model benchmarks. Same pair IDs, same tokenizer boundaries, same fp32 protocol—ready for controlled small-model comparisons.</p>
