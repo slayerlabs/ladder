@@ -94,9 +94,24 @@ def create_app(model: str, revision: str | None, adapter: str | None,
                 rows = score_pairs(transient, pairs)
             mean_sentence = sum(row["sentence_prob"] for row in rows) / len(rows)
             region_rows = [row["region_prob"] for row in rows if row["region_prob"] is not None]
+            by_paradigm = {}
+            for paradigm in sorted({row["paradigm"] for row in rows}):
+                subset = [row for row in rows if row["paradigm"] == paradigm]
+                regions = [row["region_prob"] for row in subset if row["region_prob"] is not None]
+                by_paradigm[paradigm] = {
+                    "n": len(subset),
+                    "agreement_probability": sum(row["sentence_prob"] for row in subset) / len(subset),
+                    "morphology_probability": (sum(regions) / len(regions) if regions else None),
+                }
             result = {"model": transient.metadata, "count": len(rows),
                       "mean_sentence_probability": mean_sentence,
                       "mean_region_probability": (sum(region_rows) / len(region_rows) if region_rows else None),
+                      "metrics": {"bpb": None,
+                                  "agreement": {"mean_pair_probability": mean_sentence},
+                                  "morphology": {"mean_critical_region_probability": (sum(region_rows) / len(region_rows) if region_rows else None),
+                                                  "by_paradigm": by_paradigm}},
+                      "coverage": {"bpb": 0, "agreement_pairs": len(rows), "morphology_regions": len(region_rows)},
+                      "missing": ["frozen validation corpus (BPB)"],
                       "elapsed_seconds": time.perf_counter() - started,
                       "provisional": True, "native_review": "pending",
                       "decision_eligible": False}
