@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tiny LLM Ladder · GPU scorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root { color-scheme: dark; --bg:#0b1020; --panel:#121a2d; --line:#273554; --text:#e8edf7; --muted:#9aa8c2; --accent:#78a9ff; --good:#73dfb2; }
     * { box-sizing:border-box } body { margin:0; font:15px/1.5 ui-sans-serif,system-ui,-apple-system,sans-serif; color:var(--text); background:radial-gradient(circle at 75% -10%,#1b3562 0,transparent 38%),var(--bg) }
@@ -20,6 +23,36 @@
     code { color:#c5d7ff; background:#0a1224; padding:2px 5px; border-radius:4px } pre { overflow:auto; padding:16px; border:1px solid var(--line); border-radius:8px; background:#080e1b; color:#c5d7ff }
     footer { margin-top:55px; color:var(--muted); font-size:13px } .status { display:inline-flex; align-items:center; gap:7px } .dot { width:8px;height:8px;border-radius:50%;background:var(--good);display:inline-block }
     @media(max-width:720px) { main { padding:30px 16px 50px } .hero { padding-top:54px } .grid { grid-template-columns:repeat(2,1fr) } th,td { padding:9px 5px; font-size:13px } }
+    /* Fabryka visual system: paper, editorial serif headlines, orange accent, mono evidence labels. */
+    :root { --paper:#fcfaf6; --paper-2:#f3efe9; --ink:#1a1512; --ink-2:#49423d; --mute:#766e68; --rule:#d7d1ca; --sota:#b33b00; --dark:#1d1916; }
+    body { background:var(--paper); color:var(--ink); font:14px/1.55 Inter,Arial,sans-serif; }
+    main { max-width:1440px; padding:0 56px 70px; }
+    nav { height:64px; margin:0 -56px; padding:0 56px; border-bottom:1px solid var(--rule); color:var(--ink); background:rgba(252,250,246,.97); }
+    .mark { color:var(--ink); font:500 24px/1 'EB Garamond',Georgia,serif; letter-spacing:0; }
+    nav > span:last-child { color:var(--mute); font:10px 'JetBrains Mono',monospace; letter-spacing:.06em; }
+    .hero { max-width:780px; padding:86px 0 62px; }
+    h1,h2 { font-family:'EB Garamond',Georgia,serif; font-weight:500; }
+    h1 { font-size:clamp(56px,7vw,88px); line-height:.94; letter-spacing:-.04em; }
+    h1 span { color:var(--sota); }
+    h2 { font-size:clamp(34px,4vw,52px); line-height:1; }
+    .lede { color:var(--ink-2); font:400 22px/1.43 'EB Garamond',Georgia,serif; }
+    .kicker { color:var(--sota); font:500 10px 'JetBrains Mono',monospace; letter-spacing:.08em; }
+    .actions { margin-top:30px; }
+    a.button, button.button { border:1px solid var(--ink); border-radius:0; padding:11px 16px; background:var(--ink); color:var(--paper); font:500 11px Inter,Arial,sans-serif; }
+    a.button:not(.primary) { background:transparent; color:var(--ink); }
+    .panel,.card { border:1px solid var(--rule); border-radius:0; background:#fffdf9; }
+    .panel { padding:24px; }
+    .grid { gap:0; margin:14px 0 44px; border-top:1px solid var(--ink); border-left:1px solid var(--rule); }
+    .grid .card { min-height:130px; padding:20px; border-top:0; border-left:0; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); }
+    .value { font:500 28px/1 'JetBrains Mono',monospace; }
+    table { margin-top:18px; border-top:1px solid var(--ink); }
+    th { color:var(--mute); font:500 9px 'JetBrains Mono',monospace; border-bottom:1px solid var(--ink); }
+    td { border-bottom:1px solid var(--rule); }
+    code,pre { border-radius:0; font-family:'JetBrains Mono',monospace; }
+    pre { background:var(--dark); color:var(--paper); border:0; }
+    footer { border-top:1px solid var(--rule); }
+    input { font-family:Inter,Arial,sans-serif; }
+    @media(max-width:720px) { main { padding:0 20px 50px } nav { margin:0 -20px; padding:0 20px; } .hero { padding-top:62px; } }
   </style>
 </head>
 <body>
