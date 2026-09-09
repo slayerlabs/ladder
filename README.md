@@ -4,6 +4,8 @@ A continuous evaluation pipeline for **8M → 25M → 50M → 120M**, with three
 
 The default CLI now runs standalone Transformers/PyTorch scorers; **no `lm-eval-harness` dependency** is needed. The original synthetic suite remains available as `ladder-synthetic`, documented in [the legacy notes](docs/legacy-synthetic.md). Its accuracy tiers are not training-decision criteria.
 
+See [benchmark cost versus discrimination](results/benchmark-cost-discrimination.md) for the measured pair runtime, Pollock’s published English battery, forward-request cost proxies, and the rule for calculating a real discrimination factor.
+
 <!-- micro-results:start -->
 ## Measured Polish micro — provisional
 
