@@ -80,7 +80,7 @@
     .loop-node rect { fill:#fffdf9; stroke:var(--ink); stroke-width:1.3; }
     .loop-node text { fill:var(--sota); font:500 10px 'JetBrains Mono',monospace; letter-spacing:.08em; }
     .loop-node text:nth-of-type(2) { fill:var(--ink); font:500 15px Inter,Arial,sans-serif; letter-spacing:.02em; }
-    .loop-node small { fill:var(--mute); font:10px 'JetBrains Mono',monospace; }
+    .loop-node .node-sub { fill:var(--mute); font:10px 'JetBrains Mono',monospace; }
     .accent-node rect { fill:var(--sota); stroke:var(--sota); }
     .accent-node text, .accent-node text:nth-of-type(2) { fill:var(--paper); }
     .loop-caption { fill:var(--mute); font:11px 'JetBrains Mono',monospace; }
@@ -130,6 +130,7 @@ curl -X POST https://eval.fabryka.ai/v1/score/pairs \
   <footer>Provisional result · native review pending · no decision eligibility · <a href="/docs" style="color:var(--accent)">OpenAPI docs</a> · <a href="/health" style="color:var(--accent)">health</a></footer>
 </main>
 <script>
+document.querySelectorAll('svg').forEach(svg=>{svg.innerHTML=svg.innerHTML.replaceAll('<small','<text class="node-sub"').replaceAll('</small>','</text>');});
 fetch('/health').then(r=>r.json()).then(x=>{document.querySelector('#state').textContent='service online · '+x.model.device;document.querySelector('#model').textContent=x.model.model.split('/').pop();document.querySelector('#params').textContent=(x.model.parameters/1e6).toFixed(1)+'M'}).catch(()=>{document.querySelector('.dot').style.background='#ff8d8d';document.querySelector('#state').textContent='health check failed'});
 document.querySelector('#run-form').addEventListener('submit', async event => { event.preventDefault(); const out=document.querySelector('#run-result'); out.style.display='block'; out.textContent='Loading model and scoring…'; try { const response=await fetch('/v1/benchmark/micro',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({model:document.querySelector('#hf-model').value,limit:2000})}); const body=await response.json(); if(!response.ok) throw new Error(body.detail||'request failed'); out.textContent=JSON.stringify(body,null,2); } catch (error) { out.textContent='Error: '+error.message; } });
 </script>
