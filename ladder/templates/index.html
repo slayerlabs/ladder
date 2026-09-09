@@ -27,12 +27,12 @@
     :root { --paper:#fcfaf6; --paper-2:#f3efe9; --ink:#1a1512; --ink-2:#49423d; --mute:#766e68; --rule:#d7d1ca; --sota:#b33b00; --dark:#1d1916; }
     body { background:var(--paper); color:var(--ink); font:16px/1.6 Inter,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
     main { max-width:1440px; padding:0 56px 70px; }
-    nav { height:64px; margin:0 -56px; padding:0 56px; border-bottom:1px solid var(--rule); color:var(--ink); background:rgba(252,250,246,.97); }
+    nav { height:64px; margin:0 -56px; padding:0 56px; display:flex; align-items:center; justify-content:flex-start; gap:0; border-bottom:1px solid var(--rule); color:var(--ink); background:rgba(252,250,246,.97); }
     .brand { display:flex; align-items:baseline; color:var(--ink); text-decoration:none; white-space:nowrap; }
     .brand strong, .brand > span { font:500 25px/1 'EB Garamond',Georgia,serif; }
     .brand > span { color:var(--sota); }
     .brand small { margin-left:11px; color:var(--mute); font:400 9px 'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.06em; }
-    .nav-links { display:flex; gap:25px; margin-left:48px; }
+    .nav-links { display:flex; align-items:center; gap:25px; margin-left:48px; }
     .nav-links a, .api-link { color:var(--ink); font:400 12px Inter,Arial,sans-serif; text-decoration:none; }
     .nav-links a:hover { color:var(--sota); }
     .nav-right { display:flex; gap:18px; align-items:center; margin-left:auto; }
