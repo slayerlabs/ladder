@@ -24,7 +24,8 @@ def bpb(total_nll_nats, total_bytes):
 
 
 class Scorer:
-    def __init__(self, model_path, revision=None, device="cpu", batch_size=8, context=512, adapter=None, attention=None):
+    def __init__(self, model_path, revision=None, device="cpu", batch_size=8, context=512, adapter=None, attention=None,
+                 dynamic_padding=True):
         os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -38,6 +39,7 @@ class Scorer:
         if adapter not in (None, 'koliber'):
             raise ValueError('Unknown model adapter')
         self.adapter = adapter
+        self.dynamic_padding = bool(dynamic_padding)
         self.attention = attention or ('sdpa_math' if adapter == 'koliber' else 'eager')
         if self.attention not in ('eager', 'sdpa_math') or (adapter == 'koliber' and self.attention != 'sdpa_math'):
             raise ValueError('Use eager or sdpa_math attention; Koliber requires sdpa_math')
@@ -64,7 +66,8 @@ class Scorer:
                          "resolved_revision": getattr(self.model.config, "_commit_hash", None),
                          "parameters": sum(p.numel() for p in self.model.parameters()),
                          "adapter": adapter, "dtype": "float32", "attention": self.attention, "deterministic_algorithms": True,
-                         "batch_shape": [batch_size, context], "stride": context // 2,
+                         "batch_shape": [batch_size, "dynamic<=%d" % context] if self.dynamic_padding else [batch_size, context],
+                         "stride": context // 2,
                          "document_start_token": self.bos, "device": device,
                          "tokenizer_sha256": hashlib.sha256(self.tokenizer.backend_tokenizer.to_str().encode()).hexdigest()}
         import importlib.metadata
@@ -82,7 +85,10 @@ class Scorer:
         def flush():
             if not jobs:
                 return
-            inputs = t.full((self.batch_size, self.context), self.bos, dtype=t.long, device=self.device)
+            width = self.context
+            if self.dynamic_padding:
+                width = max(len(job[1]) for job in jobs) + 1
+            inputs = t.full((self.batch_size, width), self.bos, dtype=t.long, device=self.device)
             masks = t.zeros_like(inputs)
             labels = t.zeros_like(inputs)
             selected = t.zeros_like(inputs, dtype=t.bool)

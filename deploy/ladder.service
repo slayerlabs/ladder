@@ -1,0 +1,27 @@
+[Unit]
+Description=Tiny LLM benchmark scorer on RTX 3090
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/ladder
+Environment=CUDA_VISIBLE_DEVICES=0
+Environment=LADDER_MODEL=OrisTeam/Koliber-v1.1-Base-Preview
+Environment=LADDER_REVISION=10bfff5fec23a43cd798b80645f95673a234f39a
+Environment=LADDER_ADAPTER=koliber
+Environment=LADDER_DEVICE=cuda:0
+Environment=LADDER_BATCH_SIZE=8
+Environment=LADDER_CONTEXT=512
+Environment=LADDER_HOST=127.0.0.1
+Environment=LADDER_PORT=18150
+ExecStart=/usr/bin/python3 -m ladder.service
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=300
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

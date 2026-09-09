@@ -34,6 +34,18 @@ Both models scored the **same 2,000 pair IDs**; critical-region results cover th
 
 **Not yet measured:** real corpus scores, seed noise, rung admission, complete-tier runtimes, or rank agreement. Provisional pair-only results and runtimes are reported above. The full training pool, held-out sources, and multi-seed training checkpoints have not been supplied. PL paradigms beyond agreement, the EN dataset, natural MC datasets, and release-only adapters are not built yet.
 
+## Private RTX 3090 scoring service
+
+The repository includes a single-worker FastAPI service and a user-level systemd unit in [`deploy/ladder.service`](deploy/ladder.service). On `simp`, it is running on `127.0.0.1:18150`, with Koliber v1.1 pinned to revision `10bfff5...`, CUDA device 0, fp32, math SDPA and dynamic length padding. The endpoint serializes requests and accepts at most 2,000 pairs per call:
+
+```sh
+curl -X POST http://127.0.0.1:18150/v1/score/pairs \
+  -H 'content-type: application/json' \
+  --data-binary @pairs-request.json
+```
+
+`GET /health` reports the loaded revision, parameter count, tokenizer hash, device, precision and deterministic settings. It is bound to loopback; use SSH port forwarding or an authenticated private proxy rather than exposing the scorer publicly. The service currently scores pairs only; corpus and MC endpoints can be added after their frozen datasets are available.
+
 ## Install and verify
 
 ```sh
