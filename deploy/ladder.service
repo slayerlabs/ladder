@@ -15,6 +15,7 @@ Environment=LADDER_BATCH_SIZE=8
 Environment=LADDER_CONTEXT=512
 Environment=LADDER_HOST=100.70.120.9
 Environment=LADDER_PORT=18150
+Environment=LADDER_PAIRS=/home/kacper/ladder/data-pairs.jsonl
 ExecStart=/usr/bin/python3 -m ladder.service
 Restart=on-failure
 RestartSec=5

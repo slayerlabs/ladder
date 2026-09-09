@@ -160,3 +160,15 @@ To run the pair component while the corpus and native review remain unavailable:
 ```
 
 This measures 2,000 deterministic, stratified agreement pairs. It does **not** measure the missing 200k-token BPB component or establish reviewed benchmark capability. Reports retain missing coverage, actual parameter count (126,044,928), wall time, and `decision_eligible: false`. `--rung 120` selects the nearest intended reporting rung explicitly; it does not change the recorded model size.
+
+## Hosted micro evaluator
+
+The GPU-backed evaluator is available at [eval.fabryka.ai](https://eval.fabryka.ai). Paste a Hugging Face model ID or URL into the landing page, or call:
+
+```sh
+curl -X POST https://eval.fabryka.ai/v1/benchmark/micro \
+  -H 'content-type: application/json' \
+  -d '{"model":"SlayerLab/pollock-mini-lm-125m","limit":2000}'
+```
+
+It runs the provisional Polish agreement micro battery on the RTX 3090 and returns continuous sentence/region pair probabilities plus resolved revision, parameter count, tokenizer hash, protocol and elapsed time. Results remain provisional and are not decision eligible until the pair pool passes native review and the frozen BPB slices are installed.
