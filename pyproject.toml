@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tiny-llm-ladder"
+version = "0.2.0"
+description = "Reproducible capability probes for small language models"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["torch>=2.6", "transformers>=4.51", "tokenizers>=0.21", "datasketch>=1.6"]
+legacy-hf = ["lm-eval[hf]>=0.4.9,<0.5"]
+
+[project.scripts]
+ladder = "ladder.dev_cli:main"
+ladder-synthetic = "ladder.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ladder*"]

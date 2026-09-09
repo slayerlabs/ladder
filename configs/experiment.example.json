@@ -1,0 +1,128 @@
+{
+  "metrics": [
+    "bpb/out_of_mix",
+    "pair/pl/SV-P/sentence_prob"
+  ],
+  "runs": [
+    {
+      "rung": 8,
+      "mix": "control",
+      "seed": 0,
+      "training_config_sha256": "REPLACE_WITH_HASH_OF_NON_SEED_TRAINING_CONFIG",
+      "checkpoints": [
+        {
+          "step": 8000,
+          "report": "../runs/8m/control/seed0/step8000.json"
+        },
+        {
+          "step": 9000,
+          "report": "../runs/8m/control/seed0/step9000.json"
+        },
+        {
+          "step": 10000,
+          "report": "../runs/8m/control/seed0/step10000.json"
+        }
+      ]
+    },
+    {
+      "rung": 8,
+      "mix": "control",
+      "seed": 1,
+      "training_config_sha256": "REPLACE_WITH_HASH_OF_NON_SEED_TRAINING_CONFIG",
+      "checkpoints": [
+        {
+          "step": 8000,
+          "report": "../runs/8m/control/seed1/step8000.json"
+        },
+        {
+          "step": 9000,
+          "report": "../runs/8m/control/seed1/step9000.json"
+        },
+        {
+          "step": 10000,
+          "report": "../runs/8m/control/seed1/step10000.json"
+        }
+      ]
+    },
+    {
+      "rung": 8,
+      "mix": "control",
+      "seed": 2,
+      "training_config_sha256": "REPLACE_WITH_HASH_OF_NON_SEED_TRAINING_CONFIG",
+      "checkpoints": [
+        {
+          "step": 8000,
+          "report": "../runs/8m/control/seed2/step8000.json"
+        },
+        {
+          "step": 9000,
+          "report": "../runs/8m/control/seed2/step9000.json"
+        },
+        {
+          "step": 10000,
+          "report": "../runs/8m/control/seed2/step10000.json"
+        }
+      ]
+    },
+    {
+      "rung": 25,
+      "mix": "control",
+      "seed": 0,
+      "training_config_sha256": "REPLACE_WITH_HASH_OF_NON_SEED_TRAINING_CONFIG",
+      "checkpoints": [
+        {
+          "step": 8000,
+          "report": "../runs/25m/control/seed0/step8000.json"
+        },
+        {
+          "step": 9000,
+          "report": "../runs/25m/control/seed0/step9000.json"
+        },
+        {
+          "step": 10000,
+          "report": "../runs/25m/control/seed0/step10000.json"
+        }
+      ]
+    },
+    {
+      "rung": 25,
+      "mix": "control",
+      "seed": 1,
+      "training_config_sha256": "REPLACE_WITH_HASH_OF_NON_SEED_TRAINING_CONFIG",
+      "checkpoints": [
+        {
+          "step": 8000,
+          "report": "../runs/25m/control/seed1/step8000.json"
+        },
+        {
+          "step": 9000,
+          "report": "../runs/25m/control/seed1/step9000.json"
+        },
+        {
+          "step": 10000,
+          "report": "../runs/25m/control/seed1/step10000.json"
+        }
+      ]
+    },
+    {
+      "rung": 25,
+      "mix": "control",
+      "seed": 2,
+      "training_config_sha256": "REPLACE_WITH_HASH_OF_NON_SEED_TRAINING_CONFIG",
+      "checkpoints": [
+        {
+          "step": 8000,
+          "report": "../runs/25m/control/seed2/step8000.json"
+        },
+        {
+          "step": 9000,
+          "report": "../runs/25m/control/seed2/step9000.json"
+        },
+        {
+          "step": 10000,
+          "report": "../runs/25m/control/seed2/step10000.json"
+        }
+      ]
+    }
+  ]
+}

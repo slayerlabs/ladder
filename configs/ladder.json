@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "rungs_millions": [8, 25, 50, 120],
+  "slices": ["pl_web", "pl_prose", "pl_wiki", "pl_dialogue", "pl_technical_legal", "en_web", "en_prose", "code"],
+  "reference_tokens_per_slice": 150000,
+  "minimum_out_of_mix_slices": 2,
+  "dedup": {"word_ngram": 13, "jaccard_threshold": 0.8, "minhash_permutations": 128, "seed": 1},
+  "tiers": {
+    "micro": {"val_reference_tokens": 200000, "val_slices": 2, "pl_agreement_pairs": 2000, "when": "every checkpoint", "decision_eligible": false},
+    "fast": {"val_reference_tokens": 1200000, "val_slices": 8, "pl_pairs": 8000, "en_pairs": 4000, "mc_tasks": 3, "when": "end of every run, all seeds", "decision_eligible": true},
+    "full": {"inherits": "fast", "pl_pairs_per_paradigm": 1000, "pl_paradigms": 25, "en_paradigms": 67, "en_pairs_per_paradigm": 128, "extensions": ["EWoK", "PolEval/KLEJ", "generation_sanity"], "when": "release only", "decision_eligible": true}
+  },
+  "noise": {"initial_rungs": [8, 25], "seeds": 3, "checkpoint_mean": 3, "minimum_snr": 1.5, "separation_sigma": 2, "recalibrate_at": 120},
+  "rank_agreement": {"candidate_mixes_min": 4, "candidate_mixes_max": 6, "small_rungs": [8, 25], "reference_rung": 120, "metric": "spearman"}
+}

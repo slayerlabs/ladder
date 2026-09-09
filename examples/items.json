@@ -1,0 +1,155 @@
+[
+  {
+    "id": "synthetic-v1/eval/42/copy/1/0",
+    "family": "copy",
+    "tier": "0",
+    "difficulty": 1,
+    "prompt": "Copy the words exactly.\nWords: bird kite yarn\nCopy:",
+    "choices": [
+      "bird bird yarn",
+      "bird kite wolf",
+      "bird yarn yarn",
+      "bird kite yarn"
+    ],
+    "answer": 3,
+    "evidence": {
+      "sequence": [
+        "bird",
+        "kite",
+        "yarn"
+      ]
+    }
+  },
+  {
+    "id": "synthetic-v1/eval/42/progression/1/0",
+    "family": "progression",
+    "tier": "0",
+    "difficulty": 1,
+    "prompt": "Continue the number sequence.\nSequence: 74, 76, 78\nNext:",
+    "choices": [
+      "78",
+      "82",
+      "80",
+      "84"
+    ],
+    "answer": 2,
+    "evidence": {
+      "start": 74,
+      "step": 2,
+      "length": 3
+    }
+  },
+  {
+    "id": "synthetic-v1/eval/42/lookup/1/0",
+    "family": "lookup",
+    "tier": "A",
+    "difficulty": 1,
+    "prompt": "bird: 75\nurn: 50\nsun: 84\nValue of bird:",
+    "choices": [
+      "34",
+      "61",
+      "90",
+      "75"
+    ],
+    "answer": 3,
+    "evidence": {
+      "pairs": {
+        "bird": 75,
+        "urn": 50,
+        "sun": 84
+      },
+      "query": "bird"
+    }
+  },
+  {
+    "id": "synthetic-v1/eval/42/arithmetic/1/0",
+    "family": "arithmetic",
+    "tier": "B",
+    "difficulty": 1,
+    "prompt": "3 + 6 =",
+    "choices": [
+      "9",
+      "10",
+      "11",
+      "8"
+    ],
+    "answer": 0,
+    "evidence": {
+      "terms": [
+        3,
+        6
+      ]
+    }
+  },
+  {
+    "id": "synthetic-v1/eval/42/sorting/1/0",
+    "family": "sorting",
+    "tier": "B",
+    "difficulty": 1,
+    "prompt": "Sort from smallest to largest.\nNumbers: 60 95 50\nSorted:",
+    "choices": [
+      "50 95 60",
+      "60 50 95",
+      "50 60 95",
+      "95 60 50"
+    ],
+    "answer": 2,
+    "evidence": {
+      "sequence": [
+        60,
+        95,
+        50
+      ]
+    }
+  },
+  {
+    "id": "synthetic-v1/eval/42/multihop/1/0",
+    "family": "multihop",
+    "tier": "C",
+    "difficulty": 1,
+    "prompt": "egg points to apple.\napple points to ice.\nfish points to egg.\nStart at fish. Follow 2 links.\nEnd:",
+    "choices": [
+      "apple",
+      "ice",
+      "moon",
+      "queen"
+    ],
+    "answer": 0,
+    "evidence": {
+      "links": {
+        "fish": "egg",
+        "egg": "apple",
+        "apple": "ice"
+      },
+      "start": "fish",
+      "hops": 2
+    }
+  },
+  {
+    "id": "synthetic-v1/eval/42/state_tracking/1/0",
+    "family": "state_tracking",
+    "tier": "D",
+    "difficulty": 1,
+    "prompt": "Initial register: 1.\nsubtract 7\nsubtract 5\nFinal register:",
+    "choices": [
+      "-10",
+      "-12",
+      "-11",
+      "-9"
+    ],
+    "answer": 2,
+    "evidence": {
+      "initial": 1,
+      "operations": [
+        [
+          "subtract",
+          7
+        ],
+        [
+          "subtract",
+          5
+        ]
+      ]
+    }
+  }
+]

@@ -1,0 +1,56 @@
+{
+  "slices": {
+    "pl_web": {
+      "sources": [
+        "pl_web-source-id"
+      ],
+      "out_of_mix": false
+    },
+    "pl_prose": {
+      "sources": [
+        "pl_prose-source-id"
+      ],
+      "out_of_mix": true
+    },
+    "pl_wiki": {
+      "sources": [
+        "pl_wiki-source-id"
+      ],
+      "out_of_mix": false
+    },
+    "pl_dialogue": {
+      "sources": [
+        "pl_dialogue-source-id"
+      ],
+      "out_of_mix": false
+    },
+    "pl_technical_legal": {
+      "sources": [
+        "pl_technical_legal-source-id"
+      ],
+      "out_of_mix": false
+    },
+    "en_web": {
+      "sources": [
+        "en_web-source-id"
+      ],
+      "out_of_mix": false
+    },
+    "en_prose": {
+      "sources": [
+        "en_prose-source-id"
+      ],
+      "out_of_mix": true
+    },
+    "code": {
+      "sources": [
+        "code-source-id"
+      ],
+      "out_of_mix": false
+    }
+  },
+  "micro_slices": [
+    "pl_prose",
+    "en_prose"
+  ]
+}
